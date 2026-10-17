@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Generated Test Outputs
+*.blend
+*.png
+*.jpg
+*.mp4
+*.mov
+*.glb
+*.gltf
+*.obj
+*.fbx
+*.stl
+test_cube.blend
+
+# Logs
+*.log
