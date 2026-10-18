@@ -15,7 +15,10 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.mcpserver import MCPServer
+except ImportError:
+    from mcp.server.fastmcp import FastMCP as MCPServer
 
 from core.discovery import AppDiscoveryEngine
 from core.logger import get_logger
@@ -28,8 +31,8 @@ from templates.blender_templates import get_studio_scene_snippet
 logger = get_logger("OmniDesktopServer")
 
 # Initialize Server
-mcp = FastMCP(
-    "OmniDesktop-MCP",
+mcp = MCPServer(
+    name="OmniDesktop-MCP",
     description="Universal Desktop Creative & Productivity Automation Server for AI Agents"
 )
 
@@ -329,5 +332,16 @@ def desktop_click_mouse(
 
 
 if __name__ == "__main__":
-    logger.info("Starting OmniDesktop-MCP server...")
-    mcp.run()
+    import argparse
+    parser = argparse.ArgumentParser(description="OmniDesktop-MCP Server")
+    parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="MCP transport protocol (stdio or sse)")
+    parser.add_argument("--host", default="127.0.0.1", help="Host address for SSE (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8765, help="Port for SSE (default: 8765)")
+    args, unknown = parser.parse_known_args()
+
+    logger.info("Starting OmniDesktop-MCP server (transport=%s)...", args.transport)
+    if args.transport == "sse":
+        logger.info("OmniDesktop-MCP listening on http://%s:%d/sse", args.host, args.port)
+        mcp.run(transport="sse", host=args.host, port=args.port)
+    else:
+        mcp.run(transport="stdio")
